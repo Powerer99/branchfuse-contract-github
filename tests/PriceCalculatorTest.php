@@ -6,6 +6,7 @@ namespace App\Tests;
 
 use App\PriceCalculator;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 final class PriceCalculatorTest extends TestCase
@@ -42,6 +43,7 @@ final class PriceCalculatorTest extends TestCase
         self::assertSame(400, $this->calculator->averageItemPrice($items));
     }
 
+    #[Group('known-bugs')]
     public function testAverageItemPriceOfAnEmptyBasketIsZero(): void
     {
         // Errors: averageItemPrice() throws DivisionByZeroError for an empty basket.
@@ -68,6 +70,7 @@ final class PriceCalculatorTest extends TestCase
         self::assertSame(750, $this->calculator->withCoupon(1000, 25));
     }
 
+    #[Group('known-bugs')]
     public function testCouponNeverMakesThePriceNegative(): void
     {
         // Fails: withCoupon() doesn't cap the discount at 100%.
@@ -79,6 +82,7 @@ final class PriceCalculatorTest extends TestCase
         self::assertSame([334, 333, 333], $this->calculator->splitBill(1000, 3));
     }
 
+    #[Group('known-bugs')]
     public function testSplitBillRejectsZeroPeople(): void
     {
         // Fails: splitBill() divides by zero instead of throwing InvalidArgumentException.

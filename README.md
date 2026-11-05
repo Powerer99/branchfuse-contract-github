@@ -19,6 +19,9 @@ and 1 errors (`feature/shipping` adds 3 more passing tests and 1 more failure). 
 
 Pushes to `feature/**` branches run it too.
 
+`.github/workflows/passing.yml` (*PHPUnit (passing tests)*) runs the same suite without the tests tagged
+`#[Group('known-bugs')]`, so it succeeds. Start it from BranchFuse to see a green run.
+
 ## Running the tests locally
 
 ```sh
