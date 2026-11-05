@@ -1,0 +1,43 @@
+name: PHPUnit
+
+# For trying out BranchFuse on GitHub Actions. Start it from BranchFuse on any branch (workflow_dispatch);
+# feature/** branches also run it on every push. One run takes about a minute.
+on:
+  workflow_dispatch:
+    inputs:
+      test_filter:
+        description: Only run tests whose name matches, e.g. Coupon. Empty runs them all.
+        required: false
+      currency:
+        description: Currency the formatting test uses. EUR hits a bug, so one more test fails.
+        type: choice
+        default: GBP
+        options: [GBP, USD, EUR]
+      verbose:
+        description: Show every test name as it runs.
+        type: boolean
+        default: false
+  push:
+    branches: ["feature/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  phpunit:
+    name: PHPUnit
+    runs-on: ubuntu-latest
+    env:
+      CURRENCY: ${{ inputs.currency || 'GBP' }}
+      TEST_FILTER: ${{ inputs.test_filter }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress
+      - name: Run tests
+        run: |
+          echo "Filter: ${TEST_FILTER:-all tests}, currency: ${CURRENCY}"
+          args=()
+          if [ -n "$TEST_FILTER" ]; then args+=(--filter "$TEST_FILTER"); fi
+          if [ "${{ inputs.verbose }}" = "true" ]; then args+=(--testdox); fi
+          vendor/bin/phpunit "${args[@]}"
