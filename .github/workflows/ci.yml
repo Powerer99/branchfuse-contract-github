@@ -1,0 +1,52 @@
+name: CI
+
+# A longer, multi-job run for trying out BranchFuse's live status: lint and checks first, then the tests, then a
+# package step. The pauses only stretch the run out to about two minutes so each job's status can be followed.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check PHP syntax
+        run: find src tests -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Pause
+        run: sleep 20
+
+  composer:
+    name: Composer validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Validate composer.json
+        run: composer validate --no-check-publish
+      - name: Pause
+        run: sleep 35
+
+  tests:
+    name: Unit tests
+    needs: [lint, composer]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress
+      - name: Run tests
+        run: vendor/bin/phpunit --exclude-group known-bugs
+      - name: Pause
+        run: sleep 30
+
+  package:
+    name: Package
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build archive
+        run: git archive --format=zip -o shop.zip HEAD
